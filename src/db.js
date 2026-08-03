@@ -52,8 +52,27 @@ export function openDb() {
       warnings TEXT,
       error TEXT
     );
+    CREATE TABLE IF NOT EXISTS oficial (
+      concurso INTEGER PRIMARY KEY,
+      data TEXT,
+      dezenas TEXT NOT NULL,
+      rateio TEXT NOT NULL,
+      fetched_at TEXT NOT NULL
+    );
   `);
+  try { db.exec('ALTER TABLE draws ADD COLUMN fonte TEXT'); } catch { /* coluna já existe */ }
   return db;
+}
+
+// Cache permanente dos resultados oficiais da Caixa (não mudam nunca).
+export function getOficial(concurso) {
+  const r = openDb().prepare('SELECT * FROM oficial WHERE concurso = ?').get(concurso);
+  return r ? { concurso: r.concurso, data: r.data, dezenas: JSON.parse(r.dezenas), rateio: JSON.parse(r.rateio) } : null;
+}
+
+export function saveOficial(of) {
+  openDb().prepare('INSERT OR REPLACE INTO oficial (concurso, data, dezenas, rateio, fetched_at) VALUES (?, ?, ?, ?, ?)')
+    .run(of.concurso, of.data || null, JSON.stringify(of.dezenas), JSON.stringify(of.rateio), new Date().toISOString());
 }
 
 export function hasData() {
@@ -73,8 +92,8 @@ export function replaceData(data) {
 
     const insCycle = d.prepare('INSERT INTO cycles (position, label, total_premiacao, em_andamento) VALUES (?, ?, ?, ?)');
     const insDraw = d.prepare(`INSERT INTO draws
-      (cycle_id, position, concurso, data, numeros_sorteados, acertos, numeros_acertados, status, valor_acerto, premiacao, sorteio_no_ciclo)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+      (cycle_id, position, concurso, data, numeros_sorteados, acertos, numeros_acertados, status, valor_acerto, premiacao, sorteio_no_ciclo, fonte)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
 
     data.cycles.forEach((cycle, ci) => {
       const { lastInsertRowid } = insCycle.run(ci, cycle.label ?? null, cycle.totalPremiacao ?? null, cycle.emAndamento ? 1 : 0);
@@ -84,6 +103,7 @@ export function replaceData(data) {
           JSON.stringify(dr.numerosSorteados), dr.acertos ?? null,
           JSON.stringify(dr.numerosAcertados), dr.status,
           dr.valorAcerto ?? null, dr.premiacao ?? null, dr.sorteioNoCiclo ?? null,
+          dr.fonte ?? null,
         );
       });
     });
@@ -114,6 +134,7 @@ export function getData() {
       valorAcerto: r.valor_acerto,
       premiacao: r.premiacao,
       sorteioNoCiclo: r.sorteio_no_ciclo,
+      ...(r.fonte ? { fonte: r.fonte } : {}),
     })),
   }));
 

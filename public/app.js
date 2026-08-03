@@ -51,11 +51,12 @@ function renderAlert(summary, warnings) {
         <div class="alert-text">Chegamos ao sorteio <b>${progresso} de 24</b> — faltam <b>${24 - progresso}</b>. Hora de recolher o dinheiro para o próximo ciclo, pra não perder nenhum jogo.</div></div>`;
     }
   }
-  // Só incomoda com inconsistências do ciclo em andamento; as antigas
-  // ficam registradas no log de sincronizações (tabela syncs / API).
+  // Só incomoda com inconsistências do ciclo em andamento e de nível
+  // "alerta" (fatos divergentes); avisos informativos — como prêmios
+  // pequenos que a planilha não anota — ficam no log de sincronizações.
   if (warnings && warnings.length && cicloAtual) {
     const concursosAtuais = new Set(cicloAtual.draws.map(d => d.concurso));
-    const atuais = warnings.filter(w => concursosAtuais.has(w.concurso));
+    const atuais = warnings.filter(w => concursosAtuais.has(w.concurso) && w.nivel !== 'info');
     if (atuais.length) {
       const resumo = atuais.slice(0, 3).map(w => w.msg).join(' · ');
       html += `<div class="alert alert--gold"><span class="alert-dot"></span>
@@ -170,7 +171,7 @@ function render(data, { live, warnings }) {
   if (live) {
     pill.textContent = 'dados ao vivo';
     pill.classList.add('live');
-    fonte.textContent = 'Planilha sincronizada agora · dados guardados no banco local.';
+    fonte.textContent = 'Sincronizado agora: planilha + resultados oficiais da Caixa · dados guardados no banco local.';
   } else {
     pill.textContent = 'retrato salvo';
     pill.classList.remove('live');

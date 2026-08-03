@@ -33,10 +33,10 @@ export function validateData(data) {
     for (const d of cycle.draws) {
       const ref = `concurso ${d.concurso}`;
 
-      if (concursosVistos.has(d.concurso)) warnings.push({ concurso: d.concurso, msg: `${ref} aparece mais de uma vez` });
+      if (concursosVistos.has(d.concurso)) warnings.push({ concurso: d.concurso, nivel: 'alerta', msg: `${ref} aparece mais de uma vez` });
       concursosVistos.add(d.concurso);
       if (ultimoConcurso !== null && d.concurso < ultimoConcurso) {
-        warnings.push({ concurso: d.concurso, msg: `${ref} fora de ordem (veio depois do ${ultimoConcurso})` });
+        warnings.push({ concurso: d.concurso, nivel: 'alerta', msg: `${ref} fora de ordem (veio depois do ${ultimoConcurso})` });
       }
       ultimoConcurso = d.concurso;
 
@@ -44,23 +44,23 @@ export function validateData(data) {
 
       const ns = d.numerosSorteados;
       if (ns.length !== 15) {
-        warnings.push({ concurso: d.concurso, msg: `${ref}: ${ns.length} números sorteados (esperado 15)` });
+        warnings.push({ concurso: d.concurso, nivel: 'alerta', msg: `${ref}: ${ns.length} números sorteados (esperado 15)` });
       } else {
-        if (new Set(ns).size !== 15) warnings.push({ concurso: d.concurso, msg: `${ref}: números sorteados repetidos` });
-        if (ns.some(n => !Number.isInteger(n) || n < 1 || n > 25)) warnings.push({ concurso: d.concurso, msg: `${ref}: número sorteado fora de 1–25` });
+        if (new Set(ns).size !== 15) warnings.push({ concurso: d.concurso, nivel: 'alerta', msg: `${ref}: números sorteados repetidos` });
+        if (ns.some(n => !Number.isInteger(n) || n < 1 || n > 25)) warnings.push({ concurso: d.concurso, nivel: 'alerta', msg: `${ref}: número sorteado fora de 1–25` });
       }
 
       if (d.acertos !== null && ns.length === 15 && meuJogoSet.size === 16) {
         const esperado = ns.filter(n => meuJogoSet.has(n)).length;
         if (d.acertos !== esperado) {
-          warnings.push({ concurso: d.concurso, msg: `${ref}: planilha diz ${d.acertos} acertos, mas comparando com o jogo dá ${esperado}` });
+          warnings.push({ concurso: d.concurso, nivel: 'alerta', msg: `${ref}: planilha diz ${d.acertos} acertos, mas comparando com o jogo dá ${esperado}` });
         }
       }
 
       if (d.numerosAcertados.length) {
         const nsSet = new Set(ns);
         const estranhos = d.numerosAcertados.filter(n => !meuJogoSet.has(n) || !nsSet.has(n));
-        if (estranhos.length) warnings.push({ concurso: d.concurso, msg: `${ref}: números "acertados" que não batem com jogo+sorteio: ${estranhos.join(', ')}` });
+        if (estranhos.length) warnings.push({ concurso: d.concurso, nivel: 'alerta', msg: `${ref}: números "acertados" que não batem com jogo+sorteio: ${estranhos.join(', ')}` });
       }
     }
   }

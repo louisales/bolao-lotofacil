@@ -22,4 +22,10 @@ export const CONFIG = {
   // Sincroniza sozinho a cada 30 min enquanto o servidor estiver no ar
   // (além da sincronização disparada a cada visita à página).
   syncIntervalMinutes: 30,
+  // Resultados oficiais da Caixa: preenchem o que a planilha ainda não
+  // tem e conferem o que ela tem. Limite de buscas novas por sync para a
+  // página não esperar demais (o cache no banco completa o histórico ao
+  // longo de poucas rodadas; npm run sync busca sem limite).
+  usarResultadosOficiais: true,
+  maxBuscasOficiaisPorSync: 25,
 };

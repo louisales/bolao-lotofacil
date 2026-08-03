@@ -27,13 +27,31 @@ dependência nativa).
 
 ## Arquitetura
 
-A planilha do Google Sheets continua sendo onde o grupo edita os dados.
-O que mudou é que o site não depende mais dela a cada visita:
+O site tem duas fontes que se complementam:
 
 ```
-Google Sheets ──sincronização──▶ SQLite (data/bolao.db) ──API──▶ navegador
-   (edição)      (validada)          (fonte durável)
+Google Sheets ────┐
+ (ciclos e        │
+  premiação       ├──sincronização──▶ SQLite (data/bolao.db) ──API──▶ navegador
+  registrada)     │    (validada)         (fonte durável)
+API da Caixa ─────┘
+ (resultados oficiais)
 ```
+
+- **API oficial da Caixa** (`src/caixa.js`): busca cada resultado da
+  Lotofácil direto da fonte (a mesma API de loterias.caixa.gov.br),
+  cruza as dezenas com o jogo fixo do grupo e calcula acertos e a
+  premiação da aposta de 16 dezenas (que equivale a 16 jogos de 15).
+  Com isso o site se atualiza sozinho todo dia, mesmo que ninguém toque
+  na planilha — os sorteios que ela ainda não tem entram com `fonte:
+  caixa`. Resultado oficial diverge da planilha? O oficial prevalece e
+  fica o aviso. Cada concurso buscado é cacheado para sempre no banco
+  (resultado não muda).
+- **Planilha** (`src/sheets.js`): continua dando o que só o grupo sabe —
+  quando começa cada teimosinha (as faixas de ciclo) e a premiação
+  efetivamente registrada. É também o fallback completo se a API da
+  Caixa estiver fora do ar. Se a planilha é que estiver fora do ar, a
+  sincronização parte dos dados do banco e enriquece com a Caixa.
 
 - **Servidor** (`server.js`): Express. Serve o site, expõe `GET /api/data`
   (lê do banco) e `POST /api/sync` (busca a planilha, valida e grava).
@@ -42,12 +60,15 @@ Google Sheets ──sincronização──▶ SQLite (data/bolao.db) ──API─
 - **Banco** (`src/db.js`): SQLite com tabelas `cycles`, `draws`, `meta`
   (o jogo fixo) e `syncs` (log de todas as sincronizações, com avisos).
   Cada sincronização substitui o retrato inteiro numa transação.
-- **Validação** (`src/validate.js`): a planilha é atualizada à mão e tem
-  histórico de erros, então nada entra no banco sem passar por checagens
-  (15 números por sorteio, dezenas de 1–25, acertos conferidos contra o
-  jogo, concursos duplicados/fora de ordem). Problema grave → a
-  sincronização é rejeitada e o banco mantém os últimos dados válidos;
-  suspeita pontual → entra, mas fica registrada e aparece no site.
+- **Validação** (`src/validate.js` + cruzamento oficial): a planilha é
+  atualizada à mão e tem histórico de erros, então nada entra no banco
+  sem passar por checagens (15 números por sorteio, dezenas de 1–25,
+  acertos conferidos contra o jogo e contra o resultado oficial,
+  concursos duplicados/fora de ordem/digitados errado). Problema grave →
+  a sincronização é rejeitada e o banco mantém os últimos dados válidos.
+  Avisos têm dois níveis: `alerta` (fatos divergentes — aparecem no site
+  quando são do ciclo atual) e `info` (ex.: prêmio pequeno que a
+  planilha não anota — só no log de sincronizações).
 - **Regras de negócio** (`src/build-data.js`): portadas sem alteração do
   site original — montagem dos ciclos, status `ok`/`pendente`/`sem_jogo`,
   correção manual do início do ciclo 3732, numeração sequencial dos
@@ -66,6 +87,7 @@ src/
   parse.js           parsing (CSV, datas, números) — portado do original
   build-data.js      regras de negócio dos ciclos — portado do original
   sheets.js          busca na planilha (CSV publicado → gviz), lado servidor
+  caixa.js           resultados oficiais da Caixa: busca, cache, cruzamento, prêmio
   validate.js        checagens antes de aceitar dados da planilha
   db.js              SQLite (node:sqlite): schema, leitura, gravação, log
   sync.js            orquestra: busca → valida → grava
@@ -82,8 +104,16 @@ legacy/              site original de arquivo único + handoff, para referência
   CORS. Com a busca no servidor isso não existe; a ordem das fontes segue
   só a confiabilidade — CSV "Publicar na web" primeiro, gviz como reserva.
 - **O banco é retrato, não fonte de edição**: quem manda continua sendo a
-  planilha. Se um dia o grupo quiser editar pelo site, o banco já está
-  pronto para virar fonte da verdade.
+  planilha (estrutura) + a Caixa (resultados). Se um dia o grupo quiser
+  editar pelo site, o banco já está pronto para virar fonte da verdade.
+- **O que ainda é manual**: marcar o início de uma teimosinha nova (a
+  linha de cabeçalho "Concurso" na planilha) — isso depende de o grupo
+  ter comprado o jogo, nenhuma API sabe disso. Os resultados do ciclo em
+  andamento entram sozinhos.
+- **Prêmio calculado da aposta de 16 dezenas**: com k acertos ela paga
+  `(16−k)·faixa(k) + k·faixa(k−1)` usando o rateio oficial do concurso.
+  Só preenche quando a planilha não registrou valor; divergência vira
+  aviso `info` (o grupo não anota prêmios pequenos).
 - **Alerta dos 20 sorteios**: já estava implementado na última versão do
   site original e foi mantido igual (pergunta em aberto do handoff —
   respondida: sim, implementado).
