@@ -1,0 +1,411 @@
+  :root{
+    --bg: #150F1F;
+    --bg-soft: #1B1428;
+    --panel: #201933;
+    --panel-2: #251D3B;
+    --paper: #F6EFDD;
+    --paper-ink: #241A12;
+    --paper-edge: #E4D8B8;
+    --ink: #F1ECF6;
+    --ink-soft: #B4A9C9;
+    --ink-faint: #7C7192;
+    --magenta: #E14FA0;
+    --magenta-dim: #5A2A49;
+    --gold: #E7A93D;
+    --gold-dim: #4A3B22;
+    --green: #49B389;
+    --line: #362B4C;
+    --line-soft: #2A2240;
+    --radius: 18px;
+    --shadow: 0 20px 50px -25px rgba(0,0,0,0.6);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 500px at 12% -10%, #2A2044 0%, transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, #22233F 0%, transparent 55%),
+      var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a{ color: var(--gold); }
+  ::selection{ background: var(--magenta); color: #fff; }
+
+  :focus-visible{
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  .wrap{
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding: 56px 0 36px;
+    border-bottom: 1px solid var(--line-soft);
+    margin-bottom: 36px;
+  }
+  .eyebrow{
+    font-family: 'Space Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .eyebrow::before{
+    content: '';
+    width: 26px; height: 1px;
+    background: var(--gold);
+    display: inline-block;
+  }
+  h1{
+    font-family: 'Fraunces', serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-size: clamp(32px, 5.4vw, 50px);
+    line-height: 1.06;
+    letter-spacing: -0.01em;
+    margin: 0 0 16px;
+    max-width: 15ch;
+  }
+  h1 em{
+    font-style: italic;
+    font-weight: 500;
+    color: var(--magenta);
+  }
+  .hero p{
+    color: var(--ink-soft);
+    max-width: 46ch;
+    font-size: 15.5px;
+    margin: 0;
+  }
+
+  /* ---------- ALERT BANNER ---------- */
+  .alert{
+    margin-top: 28px;
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1px solid;
+  }
+  .alert--gold{
+    background: linear-gradient(180deg, rgba(231,169,61,0.14), rgba(231,169,61,0.05));
+    border-color: rgba(231,169,61,0.4);
+  }
+  .alert--green{
+    background: linear-gradient(180deg, rgba(73,179,137,0.16), rgba(73,179,137,0.05));
+    border-color: rgba(73,179,137,0.4);
+  }
+  .alert-dot{
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--gold);
+    flex: none;
+    box-shadow: 0 0 0 4px rgba(231,169,61,0.18);
+  }
+  .alert--green .alert-dot{ background: var(--green); box-shadow: 0 0 0 4px rgba(73,179,137,0.18); }
+  .alert-text{ font-size: 14.5px; }
+  .alert-text b{ font-family: 'Space Mono', monospace; }
+
+  /* ---------- STAT ROW ---------- */
+  .stats{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-top: 28px;
+  }
+  .stat{
+    background: var(--panel);
+    padding: 18px 16px;
+  }
+  .stat-label{
+    font-family: 'Space Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 8px;
+  }
+  .stat-value{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 25px;
+    color: var(--ink);
+  }
+  .stat-value small{
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+  @media (max-width: 640px){
+    .stats{ grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ---------- SECTION HEADINGS ---------- */
+  .section-head{
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 52px 0 18px;
+  }
+  .section-head h2{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 22px;
+    margin: 0;
+  }
+  .section-head .note{
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ---------- TICKET (MEU JOGO) ---------- */
+  .ticket{
+    background: var(--paper);
+    color: var(--paper-ink);
+    border-radius: var(--radius);
+    padding: 26px 26px 22px;
+    box-shadow: var(--shadow);
+    position: relative;
+    background-image:
+      repeating-linear-gradient(90deg, transparent 0 14px, rgba(36,26,18,0.08) 14px 15px);
+    background-size: 100% 100%;
+  }
+  .ticket::before, .ticket::after{
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 14px;
+    background:
+      radial-gradient(circle at 14px 50%, var(--bg) 7px, transparent 7.5px) repeat-x;
+    background-size: 28px 14px;
+  }
+  .ticket::before{ top: -7px; }
+  .ticket::after{ bottom: -7px; transform: rotate(180deg); }
+  .ticket-top{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .ticket-label{
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6B5B3E;
+  }
+  .ticket-title{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 20px;
+    margin-top: 4px;
+  }
+  .ticket-count{
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    text-align: right;
+    color: #6B5B3E;
+    white-space: nowrap;
+  }
+  .balls{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .ball{
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    flex: none;
+  }
+  .ticket .ball{
+    background: #fff;
+    color: var(--paper-ink);
+    border: 1px solid var(--paper-edge);
+  }
+
+  /* balls inside dark draw rows */
+  .draw .ball{
+    width: 28px; height: 28px;
+    font-size: 11.5px;
+    background: var(--bg-soft);
+    color: var(--ink-faint);
+    border: 1px solid var(--line);
+  }
+  .draw .ball.hit{
+    background: var(--magenta);
+    color: #fff;
+    border-color: var(--magenta);
+    box-shadow: 0 0 0 3px rgba(225,79,160,0.18);
+  }
+
+  /* ---------- CYCLES / ACCORDION ---------- */
+  .cycle{
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+    background: var(--panel);
+  }
+  .cycle summary{
+    list-style: none;
+    cursor: pointer;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    justify-content: space-between;
+  }
+  .cycle summary::-webkit-details-marker{ display: none; }
+  .cycle-heading{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+  .cycle-chevron{
+    flex: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-faint);
+    transition: transform 0.2s ease;
+  }
+  .cycle[open] .cycle-chevron{ transform: rotate(45deg); }
+  .cycle-name{
+    font-family: 'Space Mono', monospace;
+    font-size: 13.5px;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cycle-tag{
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 100px;
+    font-family: 'Space Mono', monospace;
+    white-space: nowrap;
+    flex: none;
+  }
+  .cycle-tag--current{ background: var(--gold-dim); color: var(--gold); }
+  .cycle-tag--done{ background: var(--line-soft); color: var(--ink-faint); }
+  .cycle-money{
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--ink-soft);
+    flex: none;
+  }
+  .cycle-money b{ color: var(--gold); font-weight: 700; }
+
+  .cycle-body{
+    border-top: 1px solid var(--line-soft);
+    padding: 6px 8px;
+  }
+
+  .draw{
+    display: grid;
+    grid-template-columns: 44px 78px 1fr 84px;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 12px;
+    border-radius: 12px;
+  }
+  .draw + .draw{ border-top: 1px solid var(--line-soft); }
+  .draw:hover{ background: var(--panel-2); }
+
+  .draw-idx{
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-faint);
+    text-align: center;
+  }
+  .draw-meta{
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .draw-meta .concurso{ color: var(--ink); font-weight: 700; display:block; }
+  .draw-balls{ display: flex; flex-wrap: wrap; gap: 6px; }
+  .draw-result{ text-align: right; }
+  .draw-acertos{
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .draw-premio{
+    display: block;
+    font-size: 11.5px;
+    margin-top: 3px;
+    font-family: 'Space Mono', monospace;
+  }
+  .draw-premio.money{ color: var(--gold); }
+  .draw-premio.zero{ color: var(--ink-faint); }
+  .draw-premio.semjogo{ color: var(--ink-faint); font-style: italic; }
+  .draw-premio.pendente{ color: var(--ink-faint); }
+
+  @media (max-width: 620px){
+    .draw{ grid-template-columns: 34px 1fr; grid-template-areas: "idx meta" "balls balls" "result result"; row-gap: 8px; }
+    .draw-idx{ grid-area: idx; }
+    .draw-meta{ grid-area: meta; }
+    .draw-balls{ grid-area: balls; }
+    .draw-result{ grid-area: result; text-align: left; }
+    .cycle-money{ display: none; }
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    margin-top: 60px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line-soft);
+    color: var(--ink-faint);
+    font-size: 12.5px;
+    font-family: 'Space Mono', monospace;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  #status-pill{
+    padding: 3px 10px;
+    border-radius: 100px;
+    background: var(--line-soft);
+  }
+  #status-pill.live{ background: var(--gold-dim); color: var(--gold); }

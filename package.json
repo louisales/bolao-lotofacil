@@ -1,0 +1,18 @@
+{
+  "name": "bolao-lotofacil",
+  "version": "1.0.0",
+  "description": "Site do bolão da Lotofácil (teimosinha) — acompanha acertos, prêmios e ciclos, com dados persistidos em SQLite e sincronizados da planilha do grupo",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node scripts/seed.js",
+    "sync": "node scripts/sync-cli.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}

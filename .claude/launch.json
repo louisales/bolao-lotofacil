@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "bolao",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "/Users/luizhenriquesales/bolao-lotofacil", "start"],
+      "port": 3033
+    }
+  ]
+}
