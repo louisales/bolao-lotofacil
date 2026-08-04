@@ -1,0 +1,13 @@
+# Alternativa ao GitHub Pages: publicar pela Netlify (útil se o
+# repositório for privado — a Netlify constrói repositório privado no
+# plano gratuito, o Pages exige plano pago para isso).
+#
+# A atualização diária continua vindo do GitHub Actions
+# (.github/workflows/atualizar.yml): o commit do cache de resultados
+# dispara um novo deploy aqui.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"

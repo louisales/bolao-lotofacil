@@ -1,0 +1,60 @@
+name: Atualizar e publicar o site
+
+# Roda sozinho depois do sorteio (a Lotofácil sorteia por volta das 20h,
+# de segunda a sábado) e de novo pela manhã, como rede de segurança caso
+# o resultado ainda não estivesse publicado à noite.
+on:
+  schedule:
+    - cron: '30 1 * * *'   # 22:30 em Brasília
+    - cron: '0 12 * * *'   # 09:00 em Brasília
+  push:
+    branches: [main]
+  workflow_dispatch:        # permite rodar na mão pelo site do GitHub
+
+permissions:
+  contents: write   # para versionar o cache de resultados oficiais
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - run: npm ci
+
+      # Sincroniza planilha + resultados oficiais da Caixa e gera dist/.
+      - run: npm run build
+
+      # Guarda os resultados oficiais novos no repositório, para o próximo
+      # build não precisar buscar tudo de novo na API da Caixa.
+      - name: Versionar o cache de resultados oficiais
+        run: |
+          if [[ -n "$(git status --porcelain data/oficial.json)" ]]; then
+            git config user.name 'github-actions[bot]'
+            git config user.email 'github-actions[bot]@users.noreply.github.com'
+            git add data/oficial.json
+            git commit -m 'Atualiza cache de resultados oficiais da Caixa'
+            git push
+          else
+            echo 'Nenhum resultado oficial novo.'
+          fi
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - id: deploy
+        uses: actions/deploy-pages@v4

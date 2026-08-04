@@ -15,15 +15,43 @@ npm install
 npm start        # sobe em http://localhost:3033
 ```
 
+O servidor fica no ar enquanto o terminal estiver aberto (Ctrl+C encerra;
+os dados ficam no banco).
+
 Outros comandos:
 
 ```bash
-npm run sync     # força uma sincronização com a planilha pela linha de comando
+npm run build    # gera o site estático publicável em dist/
+npm run sync     # força uma sincronização pela linha de comando
 npm run seed     # reimporta o retrato inicial (data/seed.json) por cima do banco
 ```
 
 Requer Node 22+ (usa o SQLite embutido do Node, `node:sqlite` — sem
 dependência nativa).
+
+## Como publicar para o grupo
+
+O site publicado é **estático**: `npm run build` sincroniza tudo e embute
+o resultado no HTML, então não há servidor nem banco no ar — é só HTML,
+CSS e JS. Isso o torna gratuito de hospedar e praticamente impossível de
+cair. A atualização diária fica por conta do GitHub Actions
+(`.github/workflows/atualizar.yml`), que roda 22:30 e 09:00 (Brasília),
+regenera o site e publica.
+
+Passos, uma vez só:
+
+1. Criar um repositório no GitHub e enviar este projeto.
+2. No repositório: **Settings → Pages → Source: GitHub Actions**.
+3. Pronto — o site fica em `https://<usuário>.github.io/<repositório>/`.
+   Dá para apontar um domínio próprio depois, mas não é necessário.
+
+Repositório privado: o GitHub Pages exige plano pago para isso, então
+nesse caso publique pela Netlify (o `netlify.toml` já está configurado);
+o Actions continua atualizando os dados normalmente.
+
+O cache de resultados oficiais (`data/oficial.json`) é versionado no
+repositório de propósito: assim cada build só busca na API da Caixa os
+concursos novos, em vez dos 200+ do histórico.
 
 ## Arquitetura
 

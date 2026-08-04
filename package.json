@@ -6,6 +6,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "build": "node scripts/build-static.js",
     "seed": "node scripts/seed.js",
     "sync": "node scripts/sync-cli.js"
   },

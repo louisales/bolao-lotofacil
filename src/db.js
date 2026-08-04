@@ -70,6 +70,32 @@ export function getOficial(concurso) {
   return r ? { concurso: r.concurso, data: r.data, dezenas: JSON.parse(r.dezenas), rateio: JSON.parse(r.rateio) } : null;
 }
 
+// O cache oficial é exportado/importado como JSON para sobreviver fora
+// deste Mac: na publicação automática (GitHub Actions) o banco é
+// descartável, mas data/oficial.json fica versionado no repositório —
+// assim cada build só busca na Caixa os concursos realmente novos.
+export function exportOficial() {
+  return openDb().prepare('SELECT concurso, data, dezenas, rateio FROM oficial ORDER BY concurso').all()
+    .map(r => ({ concurso: r.concurso, data: r.data, dezenas: JSON.parse(r.dezenas), rateio: JSON.parse(r.rateio) }));
+}
+
+export function importOficial(list) {
+  const d = openDb();
+  d.exec('BEGIN');
+  try {
+    for (const of of list) saveOficial(of);
+    d.exec('COMMIT');
+  } catch (err) {
+    d.exec('ROLLBACK');
+    throw err;
+  }
+  return list.length;
+}
+
+export function countOficial() {
+  return openDb().prepare('SELECT COUNT(*) AS n FROM oficial').get().n;
+}
+
 export function saveOficial(of) {
   openDb().prepare('INSERT OR REPLACE INTO oficial (concurso, data, dezenas, rateio, fetched_at) VALUES (?, ?, ?, ?, ?)')
     .run(of.concurso, of.data || null, JSON.stringify(of.dezenas), JSON.stringify(of.rateio), new Date().toISOString());

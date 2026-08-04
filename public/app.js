@@ -159,7 +159,7 @@ function renderCycles(data, summary) {
   document.getElementById('section-note').textContent = `${data.cycles.length} ciclos · mais recente primeiro`;
 }
 
-function render(data, { live, warnings }) {
+function render(data, { modo, warnings }) {
   const summary = computeSummary(data);
   renderAlert(summary, warnings);
   renderStats(summary);
@@ -168,13 +168,19 @@ function render(data, { live, warnings }) {
 
   const pill = document.getElementById('status-pill');
   const fonte = document.getElementById('fonte-nota');
-  if (live) {
+  pill.classList.toggle('live', modo === 'live' || modo === 'estatico');
+
+  if (modo === 'live') {
     pill.textContent = 'dados ao vivo';
-    pill.classList.add('live');
     fonte.textContent = 'Sincronizado agora: planilha + resultados oficiais da Caixa · dados guardados no banco local.';
+  } else if (modo === 'estatico') {
+    pill.textContent = 'atualizado';
+    const quando = data.geradoEm ? fmtDateTime(data.geradoEm) : null;
+    fonte.textContent = quando
+      ? `Resultados oficiais da Caixa · atualizado automaticamente em ${quando}.`
+      : 'Resultados oficiais da Caixa, atualizados automaticamente.';
   } else {
     pill.textContent = 'retrato salvo';
-    pill.classList.remove('live');
     const quando = data.lastGoodSync ? fmtDateTime(data.lastGoodSync.at) : null;
     fonte.textContent = quando
       ? `Mostrando os dados do banco local, sincronizados pela última vez em ${quando}.`
@@ -189,13 +195,25 @@ async function fetchData() {
 }
 
 (async function init() {
-  // Mesmo comportamento do site original: mostra na hora o que já se
-  // tem (antes: snapshot embutido; agora: banco local) e tenta atualizar
-  // ao vivo em seguida.
+  // Dois modos, mesmo código:
+  //
+  // 1) Estático (publicado): o build (scripts/build-static.js) embute os
+  //    dados já sincronizados numa tag <script id="embedded-data">. Não
+  //    há servidor nem API — a página só desenha. É assim que o site vai
+  //    ao ar para o grupo.
+  // 2) Servidor (local): sem dados embutidos, lê /api/data e pede uma
+  //    sincronização fresca a cada visita.
+  const embedded = document.getElementById('embedded-data');
+  if (embedded) {
+    const data = JSON.parse(embedded.textContent);
+    render(data, { modo: 'estatico', warnings: data.warnings });
+    return;
+  }
+
   let data;
   try {
     data = await fetchData();
-    render(data, { live: false });
+    render(data, { modo: 'banco' });
   } catch (err) {
     document.getElementById('fonte-nota').textContent = 'Não consegui falar com o servidor.';
     return;
@@ -205,7 +223,7 @@ async function fetchData() {
     const sync = await fetch('/api/sync', { method: 'POST' }).then(r => r.json());
     if (sync.ok) {
       const fresh = await fetchData();
-      render(fresh, { live: true, warnings: sync.warnings });
+      render(fresh, { modo: 'live', warnings: sync.warnings });
     } else {
       console.info('Sincronização indisponível, mostrando o banco local.', sync.error);
     }
