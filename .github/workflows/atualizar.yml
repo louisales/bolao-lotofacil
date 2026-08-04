@@ -40,7 +40,11 @@ jobs:
 
       # Guarda os resultados oficiais novos no repositório, para o próximo
       # build não precisar buscar tudo de novo na API da Caixa.
+      # Nunca derruba a publicação: o cache é otimização, não requisito.
+      # Se o push falhar (permissão restrita, corrida com outro commit),
+      # o build seguinte apenas busca de novo na Caixa.
       - name: Versionar o cache de resultados oficiais
+        continue-on-error: true
         run: |
           if [[ -n "$(git status --porcelain data/oficial.json)" ]]; then
             git config user.name 'github-actions[bot]'
