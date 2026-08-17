@@ -47,34 +47,11 @@ export function buildData(meuJogoValues, resultadoRows) {
     current.draws.push({ concurso, data: dataStr, numerosSorteados, acertos, numerosAcertados, status, valorAcerto, premiacao, sorteioNoCiclo });
   }
 
-  // Split trailing draws off the last cycle into the next cycle, once the
-  // previous cycle already closed at 24. NOVO_CICLO_INICIO/LABEL are a
-  // manual correction (informed by the user on 2026-07-11): the new ciclo
-  // really started at concurso 3732 — draws before that in the gap had no
-  // active ticket and stay attached to the previous cycle as "sem jogo".
-  // Once the actual spreadsheet gets a proper "Concurso" header row for
-  // the new cycle, this override stops being needed (the header takes
-  // over automatically) and can be removed.
-  const NOVO_CICLO_INICIO = 3732;
-  const NOVO_CICLO_LABEL = '3732 a 3755';
-  const last = rawCycles[rawCycles.length - 1];
-  if (last && !last.label) {
-    const explicit = last.draws.map(d => d.sorteioNoCiclo).filter(n => n !== null);
-    if (explicit.length && Math.max(...explicit) >= 24) {
-      const maxVal = Math.max(...explicit);
-      let idx24 = -1;
-      last.draws.forEach((d, i) => { if (d.sorteioNoCiclo === maxVal) idx24 = i; });
-      const trailing = last.draws.slice(idx24 + 1);
-      if (trailing.length) {
-        last.draws = last.draws.slice(0, idx24 + 1);
-        const gap = trailing.filter(d => d.concurso < NOVO_CICLO_INICIO);
-        const novo = trailing.filter(d => d.concurso >= NOVO_CICLO_INICIO);
-        for (const d of gap) { d.status = 'sem_jogo'; d.sorteioNoCiclo = null; d.valorAcerto = null; d.premiacao = null; }
-        last.draws.push(...gap);
-        if (novo.length) rawCycles.push({ label: NOVO_CICLO_LABEL, totalPremiacao: null, draws: novo, emAndamento: true });
-      }
-    }
-  }
+  // Nota histórica: existia aqui uma correção manual que separava à mão o
+  // ciclo iniciado no concurso 3732, porque a planilha ainda não tinha a
+  // linha de cabeçalho "Concurso" dele. Em 2026-08-17 a planilha passou a
+  // marcar todos os ciclos corretamente (inclusive o 3762), então a
+  // correção foi removida: a linha de cabeçalho já faz esse trabalho.
 
   // Fill remaining gaps sequentially, skipping sem_jogo rows.
   for (const cycle of rawCycles) {
